@@ -112,8 +112,32 @@ def bfs_rango(vertice, n):
     return lista
 
 def ciclo(vertice, n):
-    pass
-
+    visitados = {}
+    padres = {}
+    ciclo = []
+    saltos = 0
+    cola = deque([])
+    visitados [vertice] = True
+    padres[v] = None
+    cola.append(vertice)
+    while( len(cola) > 0 and saltos < n):
+        v = cola.popleft()
+        for w in v.adyacentes:
+            if w not in visitados:
+                cola.append(w)
+                visitados [w] = True
+                padres[w] = v 
+                saltos += 1
+            if w == vertice and saltos == n:
+                while padres [w] != None:
+                    ciclo.insert (0,padres[w])
+                    w = padres[w]
+                    if padres[w] == None:
+                        ciclo.append(vertice)
+    if len(ciclo) == 0:
+        print("No se encontro recorrido")
+        return False
+    return ciclo
 def cfc():
     pass
 
