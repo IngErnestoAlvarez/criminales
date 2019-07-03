@@ -1,5 +1,4 @@
 from grafo import Grafo
-from grafo import Vertice
 from collections import deque
 from math import inf
 import heapq
@@ -11,13 +10,12 @@ def camino_minimo(grafo,u,v):
     cola.append(u)
     while len(cola) > 0:
         w = cola.popleft()
-        for x in w.adyacentes:
+        for x in grafo.adyacentes(w):
             if x not in padre:
                 padre[x] = w
                 cola.append(x)
             if x == v:
                 return camino(v, padre)
-    print("Seguimiento imposible.")
     return None
 
 def camino(v, padre):
@@ -42,7 +40,7 @@ def bfs(grafo,vertice_origen,visitados = None):
     padre[vertice_origen] = None
     while(len(cola) != 0):
         v = cola.popleft()
-        for w in v.adyacentes()
+        for w in grafo.adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
                 dist[w] = dist[v] + 1
@@ -55,11 +53,11 @@ def RandomWalks(grafo, n):
     x = 0;
     cola = deque([])
     veces = {}
-    while(x != n)
+    while(x != n):
         v = grafo.obtener_vertice_aleatorio()
         cola.append(v)
-        while(len(cola) != 0 or x != n)
-              for w in v.adyacentes(): ##Tiene que ser uno random
+        while(len(cola) != 0 or x != n):
+            for w in grafo.adyacentes(v): ##Tiene que ser uno random
                 cola.append(w)
                 veces[w] += 1;
                 x +=1
@@ -69,30 +67,38 @@ def RandomWalks(grafo, n):
 
 ##Este es exacto, necesitamos el aproximado (random walks) xq' para grafos grandes
 ##este tarda mucho
-def PageRank_o_BTC(cant):
+def PageRank_o_BTC(grafo, cant):
     cent = {}
     distancias = {}
-    for v in grafo: cent[v] = 0
-    for v in grafo:
+    for v in grafo.ver_vertices(): cent[v] = 0
+    for v in grafo.ver_vertices():
         padre,distancias = bfs(grafo,v)
-        distancias.add(distancia[v])
+        distancias.add(distancias[v])
         cent_aux = {}
-        for w in grafo: cent_aux[w] = 0
+        for w in grafo.ver_vertices(): cent_aux[w] = 0
         vertices_ordenados = ordenar_vertices(grafo,distancias)
         for w in vertices_ordenados:
             cent_aux[w] = cent_aux[w] + cent_aux[w] + 1 #cent_aux[padre[w]] += 1 + cent_aux[w]
-        for w in grafo:
-            if w == v continue
+        for w in grafo.ver_vertices():
+            if w == v:
+                continue
             cent[w] += cent_aux[w]
     return cent
 
-def camino_importante(v_vertices, k):
-    pass
 
-def laber_propagation(n):
-    pass
+def laber_propagation(grafo, n):
+    label = {}
+    i = 1
+    comunidades = 0
+    for v in grafo.ver_vertices(): 
+        label[v] = i
+        i += 1
+    while comunidades < n:
+        for w in grafo.ver_vertices():
+            label[w] = max(label[grafo.adyacentes(w)])
 
-def bfs_rango(vertice, n):
+
+def bfs_rango(grafo, vertice, n):
     if(n == 0):
         return [vertice]
     dist = {}
@@ -102,7 +108,7 @@ def bfs_rango(vertice, n):
     cola.append(vertice)
     while len(cola) > 0:
         w = cola.popleft()
-        for x in w.adyacentes:
+        for x in grafo.adyacentes(w):
             if x not in dist:
                 dist[x] = dist[w] +1
                 if(dist[x] == n):
@@ -111,7 +117,7 @@ def bfs_rango(vertice, n):
                     return lista
     return lista
 
-def ciclo(vertice, n):
+def ciclo(grafo, vertice, n):
     visitados = {}
     padres = {}
     ciclo = []
@@ -122,7 +128,7 @@ def ciclo(vertice, n):
     cola.append(vertice)
     while( len(cola) > 0 and saltos < n):
         v = cola.popleft()
-        for w in v.adyacentes:
+        for w in grafo.adyacentes(v):
             if w not in visitados:
                 cola.append(w)
                 visitados [w] = True
@@ -130,7 +136,7 @@ def ciclo(vertice, n):
                 saltos += 1
             if w == vertice and saltos == n:
                 while padres [w] != None:
-                    ciclo.insert (0,padres[w])
+                    ciclo.insert(0,padres[w])
                     w = padres[w]
                     if padres[w] == None:
                         ciclo.append(vertice)
@@ -138,6 +144,39 @@ def ciclo(vertice, n):
         print("No se encontro recorrido")
         return False
     return ciclo
-def cfc():
-    pass
 
+def tarjan(grafo):
+    S = []
+    P = []
+    orden = {}
+    visitados = set()
+    cfc = []
+    en = set()
+    for v in grafo.ver_vertices():
+        if v not in visitados:
+            orden[v] = 0
+            dfs_cfc(grafo, v, visitados, orden, P, S, cfc, en)
+    
+    return cfc
+
+def dfs_cfc(grafo, v, visitados, orden, p, s, cfcs, en_cfs):
+    visitados.add(v)
+    s.append(v)
+    p.append(v)
+    for w in grafo.adyacentes(v):
+		if w not in visitados:
+			orden[w] = orden[v] + 1
+			dfs_cfc(grafo, w, visitados, orden, p, s, cfcs, en_cfs)
+		elif w not in en_cfs:
+			while orden[p[-1]] > orden[w]:
+				p.pop()
+
+    if p[-1] == v:
+		p.pop()
+		z = None
+		nueva_cfc = []
+		while z != v:
+			z = s.pop()
+			en_cfs.append(z)
+			nueva_cfc.append(z)
+		cfcs.append(nueva_cfc)
