@@ -3,6 +3,15 @@ import sys
 from grafo import Grafo
 import csv
 
+comandos = {
+    "min_seguimientos":min_seguimientos,
+    "mas_imp":mas_imp,
+    "persecucion":persecucion,
+    "comunidades":comunidades,
+    "divulgar":divulgar,
+    "divulgar_ciclo":divulgar_ciclo,
+    "cfc":cfc
+}
 def validar_parametros(*args):
     pass
 
@@ -10,12 +19,7 @@ def cargar_grafo(archivo):
     lineas = csv.reader(archivo, delimiter='\t')
     grafo = Grafo()
     for linea in lineas:
-        if(linea[0]) not in grafo.ver_vertices():
-            grafo.add(linea[0])
-        if(linea[1]) not in grafo.ver_vertices():
-            grafo.add(linea[1])
         grafo.add_edge(linea[0], linea[1])
-    
     return grafo
     
 def min_seguimientos(grafo, origen, destino):
@@ -51,4 +55,6 @@ def main(*args):
         return -1
     grafo = cargar_grafo(archivo)
     archivo.close()
+    comando = input()
+    comandos = comando.split(sep=' ')
     return 0

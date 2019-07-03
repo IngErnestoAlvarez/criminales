@@ -15,10 +15,11 @@ class Grafo(object):
         self.cantidad += 1
 
     def add_edge(self, v, u):
-        if(v not in self.vertices or u not in self.vertices):
-            return False
+        if(v not in self.vertices):
+            self.add(v)
+        if(u not in self.vertices):
+            self.add(u)
         self.vertices[v].add(u)
-        return True
 
     def adyacentes(self, v):
         return self.vertices[v]
