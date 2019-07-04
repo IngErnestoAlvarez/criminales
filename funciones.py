@@ -26,9 +26,8 @@ def camino(v, padre):
         lista.insert(0, j)
         j = padre[j]
     return lista
-    #No habria que imprimir el resultado?
 
-#para componentes no conexas usar un for y esto adentro.
+#Para componentes no conexas usar un for y esto adentro.
 def bfs(grafo,vertice_origen,visitados = None):
     visitados = {}
     padre = {}
@@ -47,8 +46,8 @@ def bfs(grafo,vertice_origen,visitados = None):
                 padre[w] = v
                 cola.append(w)
     return (padre,dist)
+
 #Esto se tiene que hacer muchas veces, y de ahi sacar los vertices por los cuales se paso
-#odio python y mi vida.
 def RandomWalks(grafo, n):
     x = 0;
     cola = deque([])
@@ -57,34 +56,12 @@ def RandomWalks(grafo, n):
         v = grafo.obtener_vertice_aleatorio()
         cola.append(v)
         while(len(cola) != 0 or x != n):
-            for w in grafo.adyacentes(v): ##Tiene que ser uno random
+            for w in grafo.adyacentes_random(v): ##Tiene que ser uno random
                 cola.append(w)
                 veces[w] += 1;
                 x +=1
     ordenar(veces)
     return veces
-
-
-##Este es exacto, necesitamos el aproximado (random walks) xq' para grafos grandes
-##este tarda mucho
-def PageRank_o_BTC(grafo, cant):
-    cent = {}
-    distancias = {}
-    for v in grafo.ver_vertices(): cent[v] = 0
-    for v in grafo.ver_vertices():
-        padre,distancias = bfs(grafo,v)
-        distancias.add(distancias[v])
-        cent_aux = {}
-        for w in grafo.ver_vertices(): cent_aux[w] = 0
-        vertices_ordenados = ordenar_vertices(grafo,distancias)
-        for w in vertices_ordenados:
-            cent_aux[w] = cent_aux[w] + cent_aux[w] + 1 #cent_aux[padre[w]] += 1 + cent_aux[w]
-        for w in grafo.ver_vertices():
-            if w == v:
-                continue
-            cent[w] += cent_aux[w]
-    return cent
-
 
 def laber_propagation(grafo, n):
     label = {}

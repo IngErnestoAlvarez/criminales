@@ -16,7 +16,7 @@ def validar_parametros(*args):
     if len(sys.args) != 2:
         print("La cantidad de parametros es invalido") 
         return False
-
+    return True
 
 def cargar_grafo(archivo):
     lineas = csv.reader(archivo, delimiter='\t')
@@ -51,8 +51,9 @@ def divulgar_ciclo(grafo, delincuente, n):
     if lista == None:
         print("No se encontro recorrido")
         return
-    for i in lista:
-        print(i + " " + "->" + " ",end='')  #preguntar que es esto
+    for i in lista[-1]:
+        print(i + " " + "->" + " ",end='')
+    print(lista[-1])
     return
 
 
@@ -60,7 +61,9 @@ def cfc(grafo):
     pass
 
 def main(*args):
-    archivo = validar_parametros(args)
+    if (!validar_parametros(args)):
+        return False
+    archivo = open(sys.args[1],"r")
     if archivo == -1:
         return -1
     grafo = cargar_grafo(archivo)
