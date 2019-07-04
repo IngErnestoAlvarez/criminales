@@ -13,7 +13,10 @@ comandos = {
     "cfc":cfc
 }
 def validar_parametros(*args):
-    pass
+    if len(sys.args) != 2:
+        print("La cantidad de parametros es invalido") 
+        return False
+
 
 def cargar_grafo(archivo):
     lineas = csv.reader(archivo, delimiter='\t')
@@ -44,7 +47,14 @@ def divulgar(grafo, delincuente, n):
     pass
 
 def divulgar_ciclo(grafo, delincuente, n):
-    pass
+    lista = ciclo(grafo,delincuente,n)
+    if lista == None:
+        print("No se encontro recorrido")
+        return
+    for i in lista:
+        print(i + " " + "->" + " ",end='')  #preguntar que es esto
+    return
+
 
 def cfc(grafo):
     pass

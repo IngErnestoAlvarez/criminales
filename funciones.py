@@ -141,8 +141,7 @@ def ciclo(grafo, vertice, n):
                     if padres[w] == None:
                         ciclo.append(vertice)
     if len(ciclo) == 0:
-        print("No se encontro recorrido")
-        return False
+        return None
     return ciclo
 
 def tarjan(grafo):
