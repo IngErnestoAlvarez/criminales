@@ -1,7 +1,10 @@
 from grafo import Grafo
+import heapq
 from collections import deque
 from math import inf
 import heapq
+LARGO_RW = 10000
+CANTIDAD_RW = 500
 
 def camino_minimo(grafo,u,v):
     padre = {}
@@ -28,8 +31,7 @@ def camino(v, padre):
     return lista
 
 #Para componentes no conexas usar un for y esto adentro.
-def bfs(grafo,vertice_origen,visitados = None):
-    visitados = {}
+def bfs(grafo,vertice_origen,visitados = {}):
     padre = {}
     dist = {}
     cola = deque([])
@@ -47,23 +49,42 @@ def bfs(grafo,vertice_origen,visitados = None):
                 cola.append(w)
     return (padre,dist)
 
+def camino_varios_v(grafo, vertices, k):
+    importantes = beetweeness(grafo, k)
+    lista_final = camino_minimo(importantes[0], vertices[0])
+    for i in importantes:
+        for v in vertices:
+            aux = camino_minimo(grafo, v, i)
+            if len(aux) < len(lista_final):
+                lista_final = aux
+    return lista_final
 #Esto se tiene que hacer muchas veces, y de ahi sacar los vertices por los cuales se paso
-def RandomWalks(grafo, n):
-    x = 0;
-    cola = deque([])
-    veces = {}
-    while(x != n):
-        v = grafo.obtener_vertice_aleatorio()
-        cola.append(v)
-        while(len(cola) != 0 or x != n):
-            for w in grafo.adyacentes_random(v): ##Tiene que ser uno random
-                cola.append(w)
-                veces[w] += 1;
-                x +=1
-    ordenar(veces)
-    return veces
+def randomWalk(grafo, v, largo, apariciones):
+    if largo == LARGO_RW:
+        return
+    largo += 1
+    apariciones[v] += 1
+    randomWalk(grafo, grafo.adyacente_aleatorio(v), largo, apariciones)
 
-def laber_propagation(grafo, n):
+def beetweeness(grafo, cant):
+    apariciones = {}
+    for i in range(CANTIDAD_RW):
+        randomWalk(grafo, grafo.v_aleatorio(), 0, apariciones)
+    maximo = []
+    for i in apariciones:
+        if len(maximo) < cant:
+            heapq.heappush(maximo, (apariciones[i], i))
+        else:
+            if maximo[0][0] < apariciones[i]:
+                heapq.heappop(maximo)
+                heapq.heappush(maximo, (apariciones[i], i))
+    final = []
+    for i in range(cant):
+        vertice = heapq.heappop(maximo)
+        final.insert(0, vertice[1])
+    return final
+
+def label_propagation(grafo, n):
     label = {}
     i = 1
     comunidades = 0
@@ -95,32 +116,33 @@ def bfs_rango(grafo, vertice, n):
     return lista
 
 def ciclo(grafo, vertice, n):
-    visitados = {}
+    visitados = set()
     padres = {}
-    ciclo = []
-    saltos = 0
-    cola = deque([])
-    visitados [vertice] = True
-    padres[v] = None
-    cola.append(vertice)
-    while( len(cola) > 0 and saltos < n):
-        v = cola.popleft()
-        for w in grafo.adyacentes(v):
-            if w not in visitados:
-                cola.append(w)
-                visitados [w] = True
-                padres[w] = v 
-                saltos += 1
-            if w == vertice and saltos == n:
-                while padres [w] != None:
-                    ciclo.insert(0,padres[w])
-                    w = padres[w]
-                    if padres[w] == None:
-                        ciclo.append(vertice)
-    if len(ciclo) == 0:
-        return None
-    return ciclo
+    padres [vertice] = None
+    if not dfs(grafo, vertice, vertice, visitados, 0, padres, n):
+        return []
+    aux = padres[vertice]
+    final = []
+    while(vertice != aux):
+        final.insert(0,aux)
+        aux=padres[vertice]
+    final.append(vertice)
+    final.insert(0,vertice)
+    return final
 
+def dfs(grafo, v, vertice_final, visitados, saltos, padres, n):
+    if(saltos == n):
+        if vertice_final == v:
+            return True
+        return False
+    if vertice_final == v:
+        return False
+    for w in grafo.adyacentes(v):
+        if w not in visitados:
+            padres[w] = v
+            if dfs(grafo, w, vertice_final, visitados + set([w]), saltos + 1, padres, n):
+                return True
+    return False
 def tarjan(grafo):
     S = []
     P = []

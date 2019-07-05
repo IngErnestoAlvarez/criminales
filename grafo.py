@@ -1,3 +1,4 @@
+import random
 class Grafo(object):
 
     def __init__(self):
@@ -23,3 +24,9 @@ class Grafo(object):
 
     def adyacentes(self, v):
         return self.vertices[v]
+    
+    def adyacente_aleatorio(self, v):
+        return random.choice(tuple(self.vertices[v]))
+    
+    def v_aleatorio(self):
+        return random.choice(tuple(self.vertices.keys()))

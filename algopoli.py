@@ -35,10 +35,18 @@ def min_seguimientos(grafo, origen, destino):
     print(lista[-1])
 
 def mas_imp(grafo, cant):
-    pass
+    importantes = funciones.beetweeness(grafo, cant)
+    for i in importantes[:-1]:
+        print(i + ',' + " ", end='')
+    print(importantes[-1])
 
-def persecucion(grafo, delicuentes, k):
-    pass
+
+def persecucion(grafo, delincuentes, k):
+    lista_del = delincuentes.split(',')
+    camino = funciones.camino_varios_v(grafo, lista_del, k)
+    for i in camino[-1]:
+        print(i + " " + "->" + " ",end='')
+    print(camino[-1])
 
 def comunidades(grafo, n):
     pass
@@ -47,7 +55,7 @@ def divulgar(grafo, delincuente, n):
     pass
 
 def divulgar_ciclo(grafo, delincuente, n):
-    lista = ciclo(grafo,delincuente,n)
+    lista = funciones.ciclo(grafo,delincuente,n)
     if lista == None:
         print("No se encontro recorrido")
         return
@@ -58,16 +66,23 @@ def divulgar_ciclo(grafo, delincuente, n):
 
 
 def cfc(grafo):
+    arreglo_cfc = funciones.tarjan(grafo)
+    contador = 1
+    for cfc in arreglo_cfc:
+        print("CFC" + contador + ':', end=' ')
+        for v in cfc[:-1]:
+            print(v + ",", end=' ')
+        print(cfc[-1])
+
+def aplicar_comandos(grafo):
+    comando = input()
+    comandos = comando.split(sep=' ')
     pass
 
 def main(*args):
-    if (!validar_parametros(args)):
-        return False
-    archivo = open(sys.args[1],"r")
-    if archivo == -1:
-        return -1
-    grafo = cargar_grafo(archivo)
-    archivo.close()
-    comando = input()
-    comandos = comando.split(sep=' ')
+    with open(sys.args[1],"r") as archivo:
+        if (not validar_parametros(args, archivo)):
+            return False
+        grafo = cargar_grafo(archivo)
+        aplicar_comandos(grafo)
     return 0
