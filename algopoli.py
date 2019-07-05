@@ -3,7 +3,7 @@ import sys
 from grafo import Grafo
 import csv
 
-comandos = {
+COMANDOS = {
     "min_seguimientos":min_seguimientos,
     "mas_imp":mas_imp,
     "persecucion":persecucion,
@@ -21,8 +21,8 @@ def validar_parametros(*args):
 def cargar_grafo(archivo):
     lineas = csv.reader(archivo, delimiter='\t')
     grafo = Grafo()
-    for linea in lineas:
-        grafo.add_edge(linea[0], linea[1])
+    for salida, llegada in lineas:
+        grafo.add_edge(salida, llegada)
     return grafo
     
 def min_seguimientos(grafo, origen, destino):
@@ -48,11 +48,24 @@ def persecucion(grafo, delincuentes, k):
         print(i + " " + "->" + " ",end='')
     print(camino[-1])
 
+
 def comunidades(grafo, n):
-    pass
+    comunidades = funciones.label_propagation(grafo, n)
+    i = 1
+    for comunidad in comunidades:
+        if len(comunidades[comunidad]) >= n:
+            print("Comunidad " + i + ': ', end='')
+            for vertice in comunidades[comunidad][:-1]:
+                print(vertice + ", ", end='')
+            print(comunidades[comunidad][-1])
+            i += 1
+    
 
 def divulgar(grafo, delincuente, n):
-    pass
+    vertices = funciones.bfs_rango(grafo, delincuente, n)
+    for v in vertices[:-1]:
+        print(v + ", ", end='')
+    print(vertices[-1])
 
 def divulgar_ciclo(grafo, delincuente, n):
     lista = funciones.ciclo(grafo,delincuente,n)
@@ -69,15 +82,27 @@ def cfc(grafo):
     arreglo_cfc = funciones.tarjan(grafo)
     contador = 1
     for cfc in arreglo_cfc:
-        print("CFC" + contador + ':', end=' ')
+        print("CFC " + str(contador) + ':', end=' ')
         for v in cfc[:-1]:
             print(v + ",", end=' ')
         print(cfc[-1])
+        contador += 1
 
 def aplicar_comandos(grafo):
-    comando = input()
-    comandos = comando.split(sep=' ')
-    pass
+    while True:
+        comando = input()
+        comando_s, *args = comando.split(sep=' ')
+        if comando_s not in COMANDOS:
+            print("Comando equivocado")
+            return
+        if len(args) == 0:
+            COMANDOS[comando_s](grafo)
+        elif len(args) == 1:
+            COMANDOS[comando_s](grafo, args[0])
+        elif len(args) == 2:
+            COMANDOS[comando_s](grafo, args[0], args[1])
+        else:
+            print("Cantidad de paramentros invalida")
 
 def main(*args):
     with open(sys.args[1],"r") as archivo:

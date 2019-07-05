@@ -5,6 +5,7 @@ from math import inf
 import heapq
 LARGO_RW = 10000
 CANTIDAD_RW = 500
+VECES_LABEL = 300
 
 def camino_minimo(grafo,u,v):
     padre = {}
@@ -19,7 +20,7 @@ def camino_minimo(grafo,u,v):
                 cola.append(x)
             if x == v:
                 return camino(v, padre)
-    return None
+    return []
 
 def camino(v, padre):
     lista = []
@@ -30,32 +31,15 @@ def camino(v, padre):
         j = padre[j]
     return lista
 
-#Para componentes no conexas usar un for y esto adentro.
-def bfs(grafo,vertice_origen,visitados = {}):
-    padre = {}
-    dist = {}
-    cola = deque([])
-    cola.append(vertice_origen)
-    visitados[vertice_origen] = True
-    dist[vertice_origen] = 0
-    padre[vertice_origen] = None
-    while(len(cola) != 0):
-        v = cola.popleft()
-        for w in grafo.adyacentes(v):
-            if w not in visitados:
-                visitados[w] = True
-                dist[w] = dist[v] + 1
-                padre[w] = v
-                cola.append(w)
-    return (padre,dist)
-
 def camino_varios_v(grafo, vertices, k):
     importantes = beetweeness(grafo, k)
-    lista_final = camino_minimo(importantes[0], vertices[0])
+    lista_final = camino_minimo(grafo, vertices[0], importantes[0])
     for i in importantes:
         for v in vertices:
             aux = camino_minimo(grafo, v, i)
-            if len(aux) < len(lista_final):
+            if len(lista_final) == 0:
+                lista_final = aux
+            elif len(aux) < len(lista_final):
                 lista_final = aux
     return lista_final
 #Esto se tiene que hacer muchas veces, y de ahi sacar los vertices por los cuales se paso
@@ -64,10 +48,15 @@ def randomWalk(grafo, v, largo, apariciones):
         return
     largo += 1
     apariciones[v] += 1
+    w = grafo.adyacente_aleatorio(v)
+    if not w:
+        return
     randomWalk(grafo, grafo.adyacente_aleatorio(v), largo, apariciones)
 
 def beetweeness(grafo, cant):
     apariciones = {}
+    for v in grafo.ver_vertices():
+        apariciones[v] = 0
     for i in range(CANTIDAD_RW):
         randomWalk(grafo, grafo.v_aleatorio(), 0, apariciones)
     maximo = []
@@ -84,16 +73,75 @@ def beetweeness(grafo, cant):
         final.insert(0, vertice[1])
     return final
 
-def label_propagation(grafo, n):
-    label = {}
-    i = 1
-    comunidades = 0
-    for v in grafo.ver_vertices(): 
+#Para componentes no conexas usar un for y esto adentro.
+def bfs(grafo,vertice_origen, visitados):
+    cola = deque([])
+    lista = []
+    visitados.add(vertice_origen)
+    lista.append(vertice_origen)
+    cola.append(vertice_origen)
+    while(len(cola) != 0):
+        v = cola.popleft()
+        for w in grafo.adyacentes(v):
+            if w not in visitados:
+                visitados.add(w) 
+                lista.append(w)
+                cola.append(w)
+    return lista
+
+def max_freq(actual, lista):
+    freq = {}
+    for n in lista:
+        if n not in freq:
+            freq[n] = 1
+        else: 
+            freq[n] += 1
+    maximo = 0
+    numero_comunidad = actual
+    for l in freq:
+        if freq[l] > maximo:
+            maximo = freq[l]
+            numero_comunidad = l
+    return numero_comunidad
+
+def cargar_label(grafo, entrada, label):
+    for i, v in enumerate(grafo.ver_vertices()):
         label[v] = i
-        i += 1
-    while comunidades < n:
-        for w in grafo.ver_vertices():
-            label[w] = max(label[grafo.adyacentes(w)])
+        for w in grafo.adyacentes(v):
+            if w not in entrada:
+                entrada[w] = set(v)
+            else:
+                entrada[w].add(v)
+
+
+def propagation(grafo, entrada, label):
+    for i in range(VECES_LABEL):
+        v_rand = grafo.v_aleatorio()
+        visitados = set()
+        orden = bfs(grafo, v_rand, visitados)
+        for v in grafo:
+            orden = orden + bfs(grafo, v, visitados)
+        for w in orden:
+            lista = []
+            for l in entrada[w]:
+                lista.append(label[l])
+            label[w] = max_freq(label[w], lista)
+
+def label_propagation(grafo):
+    entrada = {}
+    label = {}
+    cargar_label(grafo, entrada, label)
+    propagation(grafo, entrada, label)
+
+    comunidades = {}
+    for vertice, comunidad in label:
+        if(comunidad not in comunidades):
+            comunidades[comunidad] = []
+        comunidades[comunidad].append(vertice)
+
+    return comunidades
+
+
 
 
 def bfs_rango(grafo, vertice, n):
@@ -108,11 +156,10 @@ def bfs_rango(grafo, vertice, n):
         w = cola.popleft()
         for x in grafo.adyacentes(w):
             if x not in dist:
-                dist[x] = dist[w] +1
-                if(dist[x] == n):
-                    lista.append(x)
                 if(dist[x] > n):
                     return lista
+                dist[x] = dist[w] +1
+                lista.append(x)
     return lista
 
 def ciclo(grafo, vertice, n):
@@ -125,7 +172,7 @@ def ciclo(grafo, vertice, n):
     final = []
     while(vertice != aux):
         final.insert(0,aux)
-        aux=padres[vertice]
+        aux=padres[aux]
     final.append(vertice)
     final.insert(0,vertice)
     return final
@@ -135,14 +182,18 @@ def dfs(grafo, v, vertice_final, visitados, saltos, padres, n):
         if vertice_final == v:
             return True
         return False
-    if vertice_final == v:
+    if vertice_final == v and saltos > 0:
         return False
     for w in grafo.adyacentes(v):
         if w not in visitados:
             padres[w] = v
-            if dfs(grafo, w, vertice_final, visitados + set([w]), saltos + 1, padres, n):
+            visitados.add(w)
+            if dfs(grafo, w, vertice_final, visitados, saltos + 1, padres, n):
                 return True
+            else:
+                visitados.remove(w)
     return False
+
 def tarjan(grafo):
     S = []
     P = []
@@ -156,25 +207,24 @@ def tarjan(grafo):
             dfs_cfc(grafo, v, visitados, orden, P, S, cfc, en)
     
     return cfc
-
 def dfs_cfc(grafo, v, visitados, orden, p, s, cfcs, en_cfs):
     visitados.add(v)
     s.append(v)
     p.append(v)
     for w in grafo.adyacentes(v):
-		if w not in visitados:
-			orden[w] = orden[v] + 1
-			dfs_cfc(grafo, w, visitados, orden, p, s, cfcs, en_cfs)
-		elif w not in en_cfs:
-			while orden[p[-1]] > orden[w]:
-				p.pop()
+        if w not in visitados:
+            orden[w] = orden[v] + 1
+            dfs_cfc(grafo, w, visitados, orden, p, s, cfcs, en_cfs)
+        elif w not in en_cfs:
+            while orden[p[-1]] > orden[w]:
+                p.pop()
 
     if p[-1] == v:
-		p.pop()
-		z = None
-		nueva_cfc = []
-		while z != v:
-			z = s.pop()
-			en_cfs.append(z)
-			nueva_cfc.append(z)
-		cfcs.append(nueva_cfc)
+        p.pop()
+        z = None
+        nueva_cfc = []
+        while z != v:
+            z = s.pop()
+            en_cfs.add(z)
+            nueva_cfc.append(z)
+        cfcs.append(nueva_cfc)
