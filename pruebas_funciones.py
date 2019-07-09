@@ -70,6 +70,7 @@ def pruebas_tarjan():
     grafo.add('G')
     #! H e I tienen que ser una sola componente
     grafo.add_edge('H', 'I')
+    grafo.add_edge('I', 'H')
     cfc(grafo)
 
 def persecucion(grafo, delincuentes, k):

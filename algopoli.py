@@ -3,15 +3,7 @@ import sys
 from grafo import Grafo
 import csv
 
-COMANDOS = {
-    "min_seguimientos":min_seguimientos,
-    "mas_imp":mas_imp,
-    "persecucion":persecucion,
-    "comunidades":comunidades,
-    "divulgar":divulgar,
-    "divulgar_ciclo":divulgar_ciclo,
-    "cfc":cfc
-}
+
 def validar_parametros(*args):
     if len(sys.args) != 2:
         print("La cantidad de parametros es invalido") 
@@ -25,7 +17,7 @@ def cargar_grafo(archivo):
         grafo.add_edge(salida, llegada)
     return grafo
     
-def min_seguimientos(grafo, origen, destino):
+def minseguimientos(grafo, origen, destino):
     lista = funciones.camino_minimo(grafo, origen, destino)
     if lista == None:
         print("Seguimiento imposible")
@@ -95,19 +87,42 @@ def aplicar_comandos(grafo):
         if comando_s not in COMANDOS:
             print("Comando equivocado")
             return
-        if len(args) == 0:
-            COMANDOS[comando_s](grafo)
-        elif len(args) == 1:
-            COMANDOS[comando_s](grafo, args[0])
-        elif len(args) == 2:
-            COMANDOS[comando_s](grafo, args[0], args[1])
+        if comando_s is "cfc":
+            if len(args) > 0:
+                print ("cantidad de parametros invalida")
+                continue
+            COMANDOS[comando_s]()
+        if comando_s is "divulgar" or comando_s is "comunidades" or comando_s is "mas_imp":
+            if len(args) != 1:
+                print ("cantidad de parametros invalida")
+                continue
+            COMANDOS[comando_s](args[0])
         else:
-            print("Cantidad de paramentros invalida")
+            if len(args) != 2:
+                print ("cantidad de parametros invalida")
+                continue
+            COMANDOS[comando_s](args[0], args[1])
+        break
+
+
+COMANDOS = {
+    "min_seguimientos":minseguimientos,
+    "mas_imp":mas_imp,
+    "persecucion":persecucion,
+    "comunidades":comunidades,
+    "divulgar":divulgar,
+    "divulgar_ciclo":divulgar_ciclo,
+    "cfc":cfc
+}
 
 def main(*args):
-    with open(sys.args[1],"r") as archivo:
+    with open(args[0],"r") as archivo:
         if (not validar_parametros(args, archivo)):
             return False
         grafo = cargar_grafo(archivo)
         aplicar_comandos(grafo)
     return 0
+
+if __name__ == '__main__':
+    main()
+    
