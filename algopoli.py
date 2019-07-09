@@ -5,7 +5,7 @@ import csv
 
 
 def validar_parametros(*args):
-    if len(sys.args) != 2:
+    if len(sys.argv) != 2:
         print("La cantidad de parametros es invalido") 
         return False
     return True
@@ -27,6 +27,7 @@ def minseguimientos(grafo, origen, destino):
     print(lista[-1])
 
 def mas_imp(grafo, cant):
+    cant = int(cant)
     importantes = funciones.beetweeness(grafo, cant)
     for i in importantes[:-1]:
         print(i + ',' + " ", end='')
@@ -34,37 +35,39 @@ def mas_imp(grafo, cant):
 
 
 def persecucion(grafo, delincuentes, k):
+    k = int(k)
     lista_del = delincuentes.split(',')
     camino = funciones.camino_varios_v(grafo, lista_del, k)
-    for i in camino[-1]:
+    for i in camino[:-1]:
         print(i + " " + "->" + " ",end='')
     print(camino[-1])
 
 
 def comunidades(grafo, n):
-    comunidades = funciones.label_propagation(grafo, n)
-    i = 1
-    for comunidad in comunidades:
+    n = int(n)
+    comunidades = funciones.label_propagation(grafo)
+    for i, comunidad in enumerate(comunidades, start=1):
         if len(comunidades[comunidad]) >= n:
-            print("Comunidad " + i + ': ', end='')
+            print("Comunidad " + str(i) + ': ', end='')
             for vertice in comunidades[comunidad][:-1]:
                 print(vertice + ", ", end='')
             print(comunidades[comunidad][-1])
-            i += 1
     
 
 def divulgar(grafo, delincuente, n):
+    n = int(n)
     vertices = funciones.bfs_rango(grafo, delincuente, n)
     for v in vertices[:-1]:
         print(v + ", ", end='')
     print(vertices[-1])
 
 def divulgar_ciclo(grafo, delincuente, n):
+    n = int(n)
     lista = funciones.ciclo(grafo,delincuente,n)
-    if lista == None:
+    if len(lista) == 0:
         print("No se encontro recorrido")
         return
-    for i in lista[-1]:
+    for i in lista[:-1]:
         print(i + " " + "->" + " ",end='')
     print(lista[-1])
     return
@@ -87,21 +90,21 @@ def aplicar_comandos(grafo):
         if comando_s not in COMANDOS:
             print("Comando equivocado")
             return
-        if comando_s is "cfc":
+        if comando_s == "cfc":
             if len(args) > 0:
                 print ("cantidad de parametros invalida")
                 continue
-            COMANDOS[comando_s]()
-        if comando_s is "divulgar" or comando_s is "comunidades" or comando_s is "mas_imp":
+            COMANDOS[comando_s](grafo)
+        elif comando_s == "comunidades" or comando_s == "mas_imp":
             if len(args) != 1:
                 print ("cantidad de parametros invalida")
                 continue
-            COMANDOS[comando_s](args[0])
+            COMANDOS[comando_s](grafo, args[0])
         else:
             if len(args) != 2:
                 print ("cantidad de parametros invalida")
                 continue
-            COMANDOS[comando_s](args[0], args[1])
+            COMANDOS[comando_s](grafo, args[0], args[1])
         break
 
 
@@ -115,9 +118,9 @@ COMANDOS = {
     "cfc":cfc
 }
 
-def main(*args):
-    with open(args[0],"r") as archivo:
-        if (not validar_parametros(args, archivo)):
+def main():
+    with open(sys.argv[1],"r") as archivo:
+        if (not validar_parametros(archivo)):
             return False
         grafo = cargar_grafo(archivo)
         aplicar_comandos(grafo)

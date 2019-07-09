@@ -3,8 +3,8 @@ import heapq
 from collections import deque
 from math import inf
 import heapq
-LARGO_RW = 10000
-CANTIDAD_RW = 500
+LARGO_RW = 500
+CANTIDAD_RW = 1000
 VECES_LABEL = 300
 
 def camino_minimo(grafo,u,v):
@@ -119,7 +119,7 @@ def propagation(grafo, entrada, label):
         v_rand = grafo.v_aleatorio()
         visitados = set()
         orden = bfs(grafo, v_rand, visitados)
-        for v in grafo:
+        for v in grafo.ver_vertices():
             orden = orden + bfs(grafo, v, visitados)
         for w in orden:
             lista = []
@@ -134,7 +134,7 @@ def label_propagation(grafo):
     propagation(grafo, entrada, label)
 
     comunidades = {}
-    for vertice, comunidad in label:
+    for vertice, comunidad in label.items():
         if(comunidad not in comunidades):
             comunidades[comunidad] = []
         comunidades[comunidad].append(vertice)
@@ -156,9 +156,9 @@ def bfs_rango(grafo, vertice, n):
         w = cola.popleft()
         for x in grafo.adyacentes(w):
             if x not in dist:
+                dist[x] = dist[w] +1
                 if(dist[x] > n):
                     return lista
-                dist[x] = dist[w] +1
                 lista.append(x)
     return lista
 
