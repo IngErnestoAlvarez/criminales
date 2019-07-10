@@ -160,6 +160,7 @@ def bfs_rango(grafo, vertice, n):
                 if(dist[x] > n):
                     return lista
                 lista.append(x)
+                cola.append(x)
     return lista
 
 def ciclo(grafo, vertice, n):
