@@ -20,7 +20,7 @@ def camino_minimo(grafo,u,v):
                 cola.append(x)
             if x == v:
                 return camino(v, padre)
-    return []
+    return None
 
 def camino(v, padre):
     lista = []
